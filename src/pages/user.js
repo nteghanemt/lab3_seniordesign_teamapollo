@@ -9,17 +9,14 @@ import database from "../components/firebase";
 
 var data = [{}];
 
-
-const tempvar = database.ref("Polls");
+const tempvar = database.ref("polls/");
 tempvar.on('value', (snapshot) => {
-  const temp3 = snapshot.val();
-  data = temp3;
-  console.log(data.poll5.Day);
+  snapshot.forEach( (pull) => {
+    console.log(pull.val());
+  })
+  
+  //console.log(temp3);
 })
-
-
-//console.log("hello");
-//console.log(tempvar);
 
 const UserPage = () => {
   return (
