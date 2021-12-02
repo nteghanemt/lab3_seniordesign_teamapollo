@@ -1,206 +1,153 @@
-import * as React from 'react'
-import database from './firebase'
+import * as React from "react";
+import database from "./firebase";
 
-class createPoll extends React.Component{
-
-  constructor(){
+class createPoll extends React.Component {
+  constructor() {
     super();
     this.state = {
       name: "",
-      day: 1,
-      startHour: 0,
-      startMin: 0,
-      endHour: 0,
-      endMin: 0,
+      startDate: "",
+      endHour: "",
+      timezone: "",
       location: "",
       notes: "",
-      maxvotes: 1,
-      timezone: "",
+      num_blocks: 1,
+      max_votes: 1,
       votes_per_block: 1,
       votes_per_person: 1,
-      year: 2021,
-      num_blocks: 1,
-      month: 1,
-    }
+    };
   }
 
-  updateInput = e => {
+  updateInput = (e) => {
     this.setState({
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
-  }
+  };
 
-  addPoll = e => {
+  addPoll = (e) => {
     e.preventDefault();
+
+    const startTime = new Date(Date.parse(this.state.startDate)).getTime();
+    const endTime = new Date(
+      Date.parse(this.state.startDate.slice(0, -6) + "T" + this.state.endTime)
+    ).getTime();
+
+    const timePerBlock = (endTime - startTime) / this.state.num_blocks;
 
     var data = [];
 
-    var startTimeConv = this.state.startHour * 60 + this.state.startMin
-
-    var timePerBlock = startTimeConv / this.state.num_blocks;
-
-    for (var i = 0; i < this.state.num_blocks; i++){
-
+    console.log(timePerBlock);
+    for (var i = 0; i < this.state.num_blocks; i++) {
       data.push({
-        start: {
-          hr: (startTimeConv + timePerBlock * i) / 60,
-          min: (startTimeConv + timePerBlock * i) % 60,
-        },
-        end: {
-          hr: (startTimeConv + timePerBlock * (i+1)) / 60,
-          min: (startTimeConv + timePerBlock * (i+1)) % 60
-        },
+        start: startTime + timePerBlock * i,
+        end: startTime + timePerBlock * (i + 1),
         votes: 0,
-        voters: [{
-          email: "temp",
-          num_votes: 0
-        }]
-      })
+        voters: {
+          temp: 0,
+        },
+      });
     }
-
-    console.log("test");
 
     database.ref("polls/").push({
       name: this.state.name,
-      start: {
-          hr: this.state.startHour,
-          min: this.state.startMin
-      },
-      end: {
-          hr: this.state.endHour,
-          min: this.state.endMin
-      },
-      day: this.state.day,
-      month: this.state.month,
-      year: this.state.year,
-      num_blocks: this.state.num_blocks,
+      start: startTime,
+      end: endTime,
+      timezone: this.state.timezone,
       location: this.state.location,
       notes: this.state.notes,
-      max_votes: this.state.maxvotes,
+      num_blocks: this.state.num_blocks,
+      max_votes: this.state.max_votes,
       votes_per_block: this.state.votes_per_block,
       votes_per_person: this.state.votes_per_person,
-      timezone: this.state.timezone,
-      blocks: data
-    })
+      blocks: data,
+      votes: 0,
+    });
 
     this.setState({
       name: "",
-      day: 1,
-      startHour: 0,
-      startMin: 0,
-      endHour: 0,
-      endMin: 0,
+      startDate: "",
+      endHour: "",
+      timezone: "",
       location: "",
       notes: "",
-      maxvotes: 1,
-      timezone: "",
+      num_blocks: 1,
+      max_votes: 1,
       votes_per_block: 1,
       votes_per_person: 1,
-      year: 2021,
-      num_blocks: 1,
-      month: 1,
     });
   };
 
   render() {
+    var tzoffset = new Date().getTimezoneOffset() * 60000;
+    var coeff = 1000 * 60 * 5;
+    var date = new Date(Date.now() - tzoffset);
+    var rounded_date = new Date(Math.round(date.getTime() / coeff) * coeff)
+      .toISOString()
+      .slice(0, -8);
     return (
-
-
-        /*
-      name: "",
-      day: 0,
-      startHour: 0,
-      startMin: 0,
-      endHour: 0,
-      endMin: 0,
-      location: "",
-      notes: "",
-      maxvotes: 0,
-      timezone: "",
-      votes_per_block: 0,
-      votes_per_person: 0,
-      year: 0,
-      num_blocks: 0,
-        */
-
-
-        <form onSubmit={this.addPoll}>
-          <input
-            type="text"
-            name="name"
-            placeholder="Name"
-            onChange={this.updateInput}
-            value={this.state.name}
-          />
-          <input
-            type="number"
-            min="1"
-            max="31"
-            name="day"
-            placeholder="Day"
-            onChange={this.updateInput}
-            value={this.state.day}
-          />
+      <form onSubmit={this.addPoll}>
+        Name
+        <br />
         <input
-          type="number"
-          min="1"
-          max="12"
-          name="month"
-          placeholder="month"
+          type="text"
+          name="name"
+          placeholder="Name"
           onChange={this.updateInput}
-          value={this.state.month}
+          value={this.state.name}
+          required
         />
+        <br />
+        <br />
+        Start Date and Time
+        <br />
         <input
-          type="number"
-          min="2021"
-          name="year"
-          placeholder="year"
-          onChange={this.updateInput}
-          value={this.state.year}
+          type="datetime-local"
+          name="startDate"
+          min={rounded_date}
+          value={rounded_date}
+          step="300"
+          onInput={this.updateInput}
+          value={this.state.startDate}
+          required
         />
-          <input
-            type="number"
-            name="startHour"
-            min="0"
-            max="24"
-            placeholder="StartHour"
-            onChange={this.updateInput}
-            value={this.state.startHour}
-          />
-          <input
-            type="number"
-            min="0"
-            max="60"
-            name="startMin"
-            placeholder="StartMin"
-            onChange={this.updateInput}
-            value={this.state.startMin}
-          />
-          <input
-            type="number"
-            min="0"
-            max="24"
-            name="endHour"
-            placeholder="endHour"
-            onChange={this.updateInput}
-            value={this.state.endHour}
-          />
-          <input
-            type="number"
-            min="0"
-            max="60"
-            name="endMin"
-            placeholder="endMin"
-            onChange={this.updateInput}
-            value={this.state.endMin}
-          />          
-          <input
+        <br />
+        <br />
+        End Time
+        <br />
+        <input
+          type="time"
+          name="endTime"
+          onInput={this.updateInput}
+          value={this.state.endTime}
+          required
+        />
+        <br />
+        <br />
+        Timezone
+        <br />
+        <input
+          type="text"
+          name="timezone"
+          placeholder="timezone"
+          onChange={this.updateInput}
+          value={this.state.timezone}
+          defaultValue="Default"
+        />
+        <br />
+        <br />
+        Location
+        <br />
+        <input
           type="text"
           name="location"
           placeholder="location"
           onChange={this.updateInput}
           value={this.state.location}
         />
+        <br />
+        <br />
+        Notes
+        <br />
         <input
           type="text"
           name="notes"
@@ -208,49 +155,60 @@ class createPoll extends React.Component{
           onChange={this.updateInput}
           value={this.state.notes}
         />
-        <input
-          type="number"
-          min="1"
-          name="maxvotes"
-          placeholder="maxvotes"
-          onChange={this.updateInput}
-          value={this.state.maxvotes}
-        />
-        <input
-          type="text"
-          name="timezone"
-          placeholder="timezone"
-          onChange={this.updateInput}
-          value={this.state.timezone}
-        />
-        <input
-          type="number"
-          min="1"
-          name="votes_per_block"
-          placeholder="votes_per_block"
-          onChange={this.updateInput}
-          value={this.state.votes_per_block}
-        />
-        <input
-          type="number"
-          min="1"
-          name="votes_per_person"
-          placeholder="votes_per_person"
-          onChange={this.updateInput}
-          value={this.state.votes_per_person}
-        />
+        <br />
+        <br />
+        Number of blocks
+        <br />
         <input
           type="number"
           min="1"
           name="num_blocks"
           placeholder="num_blocks"
-          onChange={this.updateInput}
+          onInput={this.updateInput}
           value={this.state.num_blocks}
         />
+        <br />
+        <br />
+        Max Votes
+        <br />
+        <input
+          type="number"
+          min="1"
+          name="max_votes"
+          placeholder="max_votes"
+          onInput={this.updateInput}
+          value={this.state.max_votes}
+          required
+        />
+        <br />
+        <br />
+        Votes per Block
+        <br />
+        <input
+          type="number"
+          min="1"
+          name="votes_per_block"
+          placeholder="votes_per_block"
+          onInput={this.updateInput}
+          value={this.state.votes_per_block}
+        />
+        <br />
+        <br />
+        Votes per Person
+        <br />
+        <input
+          type="number"
+          min="1"
+          name="votes_per_person"
+          placeholder="votes_per_person"
+          onInput={this.updateInput}
+          value={this.state.votes_per_person}
+        />
+        <br />
         <button type="submit">Submit</button>
-        </form>
-        );
-      }
+      </form>
+    );
+  }
 }
 
-export default createPoll
+export default createPoll;
