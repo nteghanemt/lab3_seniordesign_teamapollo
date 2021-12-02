@@ -1,7 +1,7 @@
 import database from "./firebase";
 import React, { Component } from "react";
 
-export default class EditPollPage extends React.Component {
+export default class EditPollPage extends Component {
   constructor() {
     super();
     this.state = {
@@ -18,6 +18,18 @@ export default class EditPollPage extends React.Component {
         max_votes: 1,
         votes_per_block: 1,
         votes_per_person: 1,
+        blocks: [
+          {
+            end: 1638546300000,
+            start: 1638545400000,
+            voters: [
+              {
+                temp: 0,
+              },
+            ],
+          },
+        ],
+        votes: 0,
       },
       error_message: "",
       name: "",
@@ -120,33 +132,23 @@ export default class EditPollPage extends React.Component {
       });
     }
 
-    this.setState({
-      poll: {
-        name: name,
-        start: start,
-        end: end,
-        timezone: timezone,
-        location: location,
-        notes: notes,
-        num_blocks: num_blocks,
-        max_votes: max_votes,
-        votes_per_block: votes_per_block,
-        votes_per_person: votes_per_person,
-        blocks: data,
-        votes: 0,
-      },
-    });
-    console.log(this.state.poll);
-    database.ref("polls/").update({
-      [this.state.selected_poll]: this.state.poll,
-    });
-    this.setState({
-      email: {
-        [e.target[2].name]: "",
-      },
-      block_num: {
-        [e.target[2].name]: 0,
-      },
+    let poll = this.state.poll;
+
+    poll.name = name;
+    poll.start = start;
+    poll.end = end;
+    poll.timezone = timezone;
+    poll.location = location;
+    poll.notes = notes;
+    poll.num_blocks = num_blocks;
+    poll.max_votes = max_votes;
+    poll.votes_per_block = votes_per_block;
+    poll.votes_per_person = votes_per_person;
+    poll.blocks = data;
+    poll.votes = 0;
+    console.log(this.state.selected_poll);
+    database.ref("polls/").set({
+      [this.state.selected_poll]: poll,
     });
   };
 

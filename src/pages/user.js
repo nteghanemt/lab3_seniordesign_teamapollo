@@ -9,11 +9,7 @@ import UserPolls from "../components/user_polls";
 const UserPage = () => {
   return (
     <main>
-      <title>About me</title>
       <h1>View available polls</h1>
-      <p>
-        Hi there! I'm the proud creator of this site, which I built with Gatsby.
-      </p>
       <UserPolls />
     </main>
   );

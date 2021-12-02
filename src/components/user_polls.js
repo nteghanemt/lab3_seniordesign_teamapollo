@@ -10,6 +10,7 @@ export default class UserPolls extends Component {
       email: {},
       block_num: {},
       error_message: "",
+      success_message: "",
     };
   }
 
@@ -62,6 +63,7 @@ export default class UserPolls extends Component {
     e.preventDefault();
     this.setState({
       error_message: "",
+      success_message: "",
     });
     this.db.once("value", (snapshot) => {
       const block_num = this.state.block_num[e.target[2].name] - 1;
@@ -106,6 +108,16 @@ export default class UserPolls extends Component {
           this.db.update({
             [e.target[2].name]: poll,
           });
+
+          this.setState({
+            success_message:
+              "Name: " +
+              poll.name +
+              " Location: " +
+              poll.location +
+              " Notes: " +
+              poll.notes,
+          });
           this.setState({
             email: {
               [e.target[2].name]: "",
@@ -129,6 +141,9 @@ export default class UserPolls extends Component {
       <div>
         {this.state.error_message && (
           <h3 className="error"> {this.state.error_message} </h3>
+        )}
+        {this.state.success_message && (
+          <h3 className="error"> {this.state.success_message} </h3>
         )}
         <ul>
           {this.state.polls.map((outer) => {
